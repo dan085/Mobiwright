@@ -1,0 +1,12 @@
+node_modules/
+dist/
+mplay-report/
+mplay-results/
+*.log
+.DS_Store
+.idea/
+.vscode/
+coverage/
+*.apk
+*.app/
+*.ipa

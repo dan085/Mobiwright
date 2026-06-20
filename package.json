@@ -1,0 +1,59 @@
+{
+  "name": "mobiwright",
+  "version": "0.1.0",
+  "description": "A Playwright-style end-to-end automation & testing framework for native iOS (Simulator) and Android (Emulator) apps.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "mplay": "./dist/cli.js",
+    "mobiwright": "./dist/cli.js",
+    "mobiwright-mcp": "./dist/mcp/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan085/Mobiwright.git"
+  },
+  "homepage": "https://github.com/dan085/Mobiwright#readme",
+  "bugs": {
+    "url": "https://github.com/dan085/Mobiwright/issues"
+  },
+  "keywords": [
+    "mobile",
+    "testing",
+    "e2e",
+    "android",
+    "ios",
+    "emulator",
+    "simulator",
+    "automation",
+    "playwright",
+    "appium",
+    "mcp"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node ./dist/cli.js test",
+    "test:android": "node ./dist/cli.js test --platform=android",
+    "test:ios": "node ./dist/cli.js test --platform=ios",
+    "test:demo": "MOBIWRIGHT_MOCK=1 node ./dist/cli.js test --grep=demo",
+    "test:ci": "node ./dist/cli.js test --config=mplay.ci.config.ts",
+    "verify": "node ./tests/device-sizes.check.cjs",
+    "mcp": "node ./dist/mcp/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}

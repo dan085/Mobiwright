@@ -1,0 +1,9 @@
+{
+  "_comment": "Ejemplo de configuración MCP para Claude Desktop / Cursor / Cowork. Copia el bloque 'mcpServers' a la config de tu cliente y ajusta la ruta absoluta.",
+  "mcpServers": {
+    "mobiwright": {
+      "command": "node",
+      "args": ["/ruta/absoluta/a/Mobiwright/dist/mcp/server.js"]
+    }
+  }
+}

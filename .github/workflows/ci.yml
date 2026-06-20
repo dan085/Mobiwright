@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build, typecheck y pruebas sin dispositivo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Comprobar el CLI
+        run: node dist/cli.js --help
+      - name: Casos borde (verify)
+        run: npm run verify
+      - name: Demo del runner (driver mock)
+        run: npm run test:demo
+      - name: Handshake MCP
+        run: |
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+            | MOBIWRIGHT_MOCK=1 node dist/mcp/server.js | grep -q '"open_app"' \
+            && echo "MCP OK"
+
+  android-e2e:
+    name: E2E Android (emulador real)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Habilitar KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Smoke E2E en el emulador (app de Ajustes)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          profile: pixel_5
+          # Espera a que adb esté listo y lanza la validación real.
+          script: |
+            adb wait-for-device
+            npm run test:ci
+      - name: Subir evidencia (JUnit + traces)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-e2e-evidence
+          path: |
+            mplay-junit.xml
+            mplay-results/**
+          if-no-files-found: ignore
+
+  ios-e2e:
+    name: E2E iOS (simulador)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Instalar idb
+        run: |
+          brew tap facebook/fb
+          brew install idb-companion
+          pip3 install fb-idb || true
+      - name: Arrancar simulador
+        run: |
+          UDID=$(xcrun simctl list devices available | grep -m1 -E 'iPhone 1[5-9]' | grep -oE '[0-9A-F-]{36}')
+          xcrun simctl boot "$UDID" || true
+          echo "IOS_UDID=$UDID" >> "$GITHUB_ENV"
+      - name: Diagnóstico iOS (doctor)
+        run: node dist/cli.js doctor --platform=ios
