@@ -490,7 +490,7 @@ interfaz `Driver`. Antes de un PR: `npm run build` y `npm run verify` en verde.
 
 ## Licencia
 
-[MIT](LICENSE)
+[MIT](LICENSE) · © 2026 **Bimbask Inc**
 
 ---
 

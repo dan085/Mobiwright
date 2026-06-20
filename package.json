@@ -2,6 +2,7 @@
   "name": "mobiwright",
   "version": "0.1.0",
   "description": "A Playwright-style end-to-end automation & testing framework for native iOS (Simulator) and Android (Emulator) apps.",
+  "author": "Bimbask Inc",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
