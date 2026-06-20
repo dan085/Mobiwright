@@ -1,25 +1,59 @@
-# Mobiwright
+<div align="center">
 
-**Automatización y testing end-to-end estilo [Playwright](https://github.com/microsoft/playwright) para apps nativas en emuladores Android y simuladores iOS — con servidor MCP para que cualquier IA conduzca y revise el flujo.**
+<h1>📱 Mobiwright</h1>
 
-🌐 **Sitio web:** https://dan085.github.io/Mobiwright/
+<p><b>Testing end-to-end de apps móviles — estilo <a href="https://github.com/microsoft/playwright">Playwright</a>, con IA.</b></p>
+
+<p>Comprueba automáticamente que tu app funciona en <b>Android</b> e <b>iOS</b> con una sola API,<br/>
+y deja que una <b>inteligencia artificial</b> recorra tu app y te avise si algo se rompe.</p>
+
+<p>
+<img alt="MIT" src="https://img.shields.io/badge/license-MIT-34d39a" />
+<img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.4-5b8cff?logo=typescript&logoColor=white" />
+<img alt="Android" src="https://img.shields.io/badge/Android-emulator-3ddc84?logo=android&logoColor=white" />
+<img alt="iOS" src="https://img.shields.io/badge/iOS-simulator-111?logo=apple&logoColor=white" />
+<img alt="MCP" src="https://img.shields.io/badge/MCP-servidor%20de%20IA-9b6cff" />
+<img alt="CI" src="https://github.com/dan085/Mobiwright/actions/workflows/ci.yml/badge.svg" />
+</p>
+
+<p>
+<a href="https://dan085.github.io/Mobiwright/"><b>🌐 Sitio web</b></a> &nbsp;·&nbsp;
+<a href="#inicio-rápido"><b>🚀 Empezar</b></a> &nbsp;·&nbsp;
+<a href="MCP.md"><b>🤖 IA / MCP</b></a> &nbsp;·&nbsp;
+<a href="report/FLOW_REPORT.md"><b>🎬 Reporte de flujo</b></a>
+</p>
+
+<br/>
+
+<img src="docs/assets/01_login.png" width="210" alt="Login" />
+<img src="docs/assets/07_webview.png" width="210" alt="WebView" />
+<img src="docs/assets/08_flowgraph.png" width="240" alt="Grafo de flujos" />
+
+</div>
+
+---
 
 Escribe **un único test** y ejecútalo en Android e iOS. API familiar (`device`,
-`locator`, `expect`), **auto-waiting** en cada acción, aserciones con reintento,
-screenshots automáticos en fallo y un **trace** navegable — sin Appium ni
-servidores intermedios: hablamos directamente con `adb`, `simctl` e `idb`.
+`getByRole`, `expect`), **auto-waiting** en cada acción, aserciones con reintento,
+**trace** y **vídeo** del flujo — sin Appium ni servidores intermedios: hablamos
+directamente con `adb`, `simctl` e `idb`.
 
 ```ts
 import { test, expect } from "mobiwright";
 
 test("login con credenciales válidas", async ({ device }) => {
-  await device.getById("email_input").fill("daniel@example.com");
-  await device.getById("password_input").fill("Sup3rSecret!");
-  await device.getByText("Iniciar sesión").tap();
+  await device.getByTestId("email_input").fill("daniel@example.com");
+  await device.getByTestId("password_input").fill("Sup3rSecret!");
+  await device.getByRole("button", { name: "Iniciar sesión" }).tap();
 
-  await expect(device.getById("home_title")).toBeVisible();
+  await expect(device.getByTestId("home_title")).toBeVisible();
 });
 ```
+
+> 💡 **¿No eres del equipo técnico?** Mobiwright es como un “probador” incansable:
+> abre tu app en un teléfono virtual, la usa solo (toca, escribe, navega) y
+> comprueba que todo funciona — dejándote un informe con capturas y vídeo. Mira el
+> [sitio web](https://dan085.github.io/Mobiwright/) para entenderlo en 30 segundos.
 
 ---
 
