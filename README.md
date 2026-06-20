@@ -2,6 +2,8 @@
 
 **Automatización y testing end-to-end estilo [Playwright](https://github.com/microsoft/playwright) para apps nativas en emuladores Android y simuladores iOS — con servidor MCP para que cualquier IA conduzca y revise el flujo.**
 
+🌐 **Sitio web:** https://dan085.github.io/Mobiwright/
+
 Escribe **un único test** y ejecútalo en Android e iOS. API familiar (`device`,
 `locator`, `expect`), **auto-waiting** en cada acción, aserciones con reintento,
 screenshots automáticos en fallo y un **trace** navegable — sin Appium ni

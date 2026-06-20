@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mobiwright — Testing E2E móvil estilo Playwright + IA</title>
+<meta name="description" content="Automatización y testing end-to-end estilo Playwright para apps nativas en emuladores Android e iOS, con servidor MCP para que cualquier IA conduzca y revise el flujo." />
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1422; --card:#121a2b; --line:#1e2940;
+    --ink:#e8edf6; --sub:#9aa7bd; --mut:#6b7890;
+    --brand:#5b8cff; --brand2:#9b6cff; --green:#34d39a; --amber:#f4b740; --red:#ff6b81;
+    --grad:linear-gradient(120deg,#5b8cff,#9b6cff 60%,#34d39a);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16213c 0,transparent 60%),var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;font-weight:600;font-size:15px;border:1px solid var(--line);transition:.2s}
+  .btn.primary{background:var(--grad);color:#0b0f17;border:none}
+  .btn.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.ghost:hover{background:#162036;border-color:#2a3a5e}
+  .chip{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .chip.ok{background:rgba(52,211,154,.14);color:var(--green)}
+  .chip.warn{background:rgba(244,183,64,.14);color:var(--amber)}
+  .chip.bad{background:rgba(255,107,129,.14);color:var(--red)}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(11,15,23,.72);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+  .logo .dot{width:22px;height:22px;border-radius:7px;background:var(--grad);box-shadow:0 0 20px rgba(91,140,255,.5)}
+  .navlinks{display:flex;gap:22px;color:var(--sub);font-size:14px;font-weight:500}
+  .navlinks a:hover{color:var(--ink)}
+  @media(max-width:760px){.navlinks{display:none}}
+
+  /* HERO */
+  .hero{padding:84px 0 60px;text-align:center;position:relative;overflow:hidden}
+  .hero .eyebrow{display:inline-block;color:var(--sub);border:1px solid var(--line);background:var(--card);
+    padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:22px}
+  .hero h1{font-size:clamp(34px,6vw,60px);line-height:1.05;margin:0 0 18px;letter-spacing:-.03em;font-weight:850}
+  .hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:clamp(16px,2.4vw,20px);color:var(--sub);max-width:680px;margin:0 auto 30px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:26px;color:var(--mut);font-size:13px}
+  .badges span{border:1px solid var(--line);padding:5px 11px;border-radius:8px;background:var(--card)}
+
+  /* SECTIONS */
+  section{padding:64px 0}
+  .sec-h{text-align:center;margin-bottom:40px}
+  .sec-h h2{font-size:clamp(26px,4vw,38px);margin:0 0 10px;letter-spacing:-.02em;font-weight:800}
+  .sec-h p{color:var(--sub);margin:0;font-size:17px}
+
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:860px){.g3{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){.g3,.g2{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .card .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:21px;
+    background:linear-gradient(140deg,#18223a,#11192b);border:1px solid var(--line);margin-bottom:14px}
+  .card h3{margin:0 0 7px;font-size:18px}
+  .card p{margin:0;color:var(--sub);font-size:14.5px}
+
+  /* CODE */
+  .code{background:#0a0e18;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .code .bar{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}
+  .code .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .code .bar .f{margin-left:10px;color:var(--mut);font-size:12px;font-family:ui-monospace,monospace}
+  pre{margin:0;padding:18px 20px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;line-height:1.7}
+  .t-key{color:#9b6cff}.t-fn{color:#5b8cff}.t-str{color:#34d39a}.t-com{color:#6b7890;font-style:italic}.t-pun{color:#9aa7bd}
+
+  /* STEPS */
+  .steps{counter-reset:s}
+  .step{display:flex;gap:18px;align-items:flex-start;padding:18px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border:none}
+  .step .n{counter-increment:s;flex:0 0 40px;height:40px;border-radius:11px;display:grid;place-items:center;
+    font-weight:800;background:var(--grad);color:#0b0f17}
+  .step .n::before{content:counter(s)}
+  .step h4{margin:2px 0 4px;font-size:17px}.step p{margin:0;color:var(--sub);font-size:14.5px}
+
+  /* GALLERY */
+  .gal{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:900px){.gal{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.gal{grid-template-columns:1fr}}
+  .shot{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.2s}
+  .shot:hover{transform:translateY(-4px);border-color:#2a3a5e}
+  .shot img{width:100%;display:block;background:#0a0e18}
+  .shot .cap{padding:12px 14px}
+  .shot .cap b{font-size:14px;display:block;margin:6px 0 0}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--sub);font-weight:600;background:#0e1626}
+  td:first-child{font-family:ui-monospace,monospace;color:var(--brand)}
+  tr:last-child td{border-bottom:none}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+  @media(max-width:820px){.cols{grid-template-columns:1fr}}
+
+  .cta-band{background:linear-gradient(120deg,#141d33,#16122a);border:1px solid var(--line);border-radius:22px;padding:42px;text-align:center}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--mut);font-size:14px}
+  footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+  .kbd{font-family:ui-monospace,monospace;background:#0a0e18;border:1px solid var(--line);padding:2px 7px;border-radius:6px;font-size:13px;color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap row">
+  <a class="logo" href="#top"><span class="dot"></span> Mobiwright</a>
+  <div class="navlinks">
+    <a href="#features">Características</a>
+    <a href="#how">Cómo funciona</a>
+    <a href="#ai">IA / MCP</a>
+    <a href="#flows">Flujos</a>
+    <a href="#start">Empezar</a>
+    <a href="https://github.com/dan085/Mobiwright">GitHub ↗</a>
+  </div>
+</div></nav>
+
+<header id="top" class="hero"><div class="wrap">
+  <span class="eyebrow">✦ E2E móvil estilo Playwright · Android + iOS · con IA</span>
+  <h1>Testing de apps móviles<br><span class="g">elegante, robusto y con IA</span></h1>
+  <p class="lead">Comprueba automáticamente que tu app móvil funciona — como lo haría una persona usándola, pero sin esfuerzo.
+  Y deja que una <b>inteligencia artificial</b> recorra tu app y te avise si algo se rompe.</p>
+  <div class="cta">
+    <a class="btn primary" href="#simple">Entender en 30 segundos</a>
+    <a class="btn ghost" href="https://github.com/dan085/Mobiwright">⭐ Ver en GitHub</a>
+  </div>
+  <div class="badges">
+    <span>TypeScript</span><span>adb · uiautomator</span><span>simctl · idb</span>
+    <span>MCP (estándar abierto)</span><span>MIT</span>
+  </div>
+</div></header>
+
+<main>
+
+<!-- EN SIMPLE (no técnico) -->
+<section id="simple" style="padding-top:30px"><div class="wrap">
+  <div class="sec-h"><h2>En simple, ¿qué es esto?</h2><p>Sin tecnicismos.</p></div>
+  <div class="grid g3">
+    <div class="card"><div class="ic">🤖</div><h3>Un “probador” incansable</h3><p>Mobiwright abre tu app en un teléfono virtual y la usa solo: toca botones, rellena formularios y comprueba que cada pantalla aparece como debe.</p></div>
+    <div class="card"><div class="ic">🧠</div><h3>Con ayuda de IA</h3><p>Puedes pedirle a una inteligencia artificial que “explore” tu app entera y te diga, en lenguaje normal, qué funciona y qué no — sin que tú escribas nada.</p></div>
+    <div class="card"><div class="ic">📋</div><h3>Te deja pruebas</h3><p>Genera un informe con capturas, un vídeo del recorrido y un mapa de las pantallas, para que cualquiera vea qué se revisó.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;text-align:center">
+    <span style="color:var(--sub);font-size:15.5px;max-width:760px">
+      <b style="color:var(--ink)">¿Para quién?</b> Para equipos que quieren asegurarse de que su app no se rompe en cada cambio,
+      sin tener que revisarla a mano una y otra vez. Lo técnico (instalar, escribir pruebas) lo hace una persona desarrolladora una vez;
+      después, se ejecuta solo.
+    </span>
+  </div>
+  <p style="text-align:center;color:var(--mut);margin-top:18px;font-size:14px">¿Eres del equipo técnico? Baja un poco para ver el código y la API ↓</p>
+</div></section>
+
+<!-- FEATURES -->
+<section id="features"><div class="wrap">
+  <div class="sec-h"><h2>Por qué Mobiwright</h2><p>Todo lo que hace robusto a Playwright, llevado al móvil nativo.</p></div>
+  <div class="grid g3">
+    <div class="card"><div class="ic">🎯</div><h3>Auto-waiting</h3><p>Cada tap, fill y expect reintenta hasta que el elemento es accionable. Adiós a los <code>sleep()</code> y a los tests flaky.</p></div>
+    <div class="card"><div class="ic">📱</div><h3>Un test, dos plataformas</h3><p>El mismo spec corre en Android e iOS. La API no conoce la plataforma; los drivers hablan con adb, simctl e idb.</p></div>
+    <div class="card"><div class="ic">🧭</div><h3>Locators semánticos</h3><p><code>getByRole</code>, <code>getByTestId</code>, <code>getByText</code> y <b>encadenamiento</b> (<code>listitem → button</code>).</p></div>
+    <div class="card"><div class="ic">🤖</div><h3>Servidor MCP</h3><p>Cualquier IA (Claude, GPT, Gemini…) se conecta, ve el árbol de accesibilidad y recorre todos los flujos.</p></div>
+    <div class="card"><div class="ic">🎬</div><h3>Trace + vídeo</h3><p>Recorrido paso a paso con capturas y grabación <code>.mp4</code> del flujo, igual que el trace viewer de Playwright.</p></div>
+    <div class="card"><div class="ic">⚡</div><h3>Paralelo y sin servidor</h3><p>Varios dispositivos a la vez (<code>workers</code>), sin Appium ni binarios intermedios.</p></div>
+  </div>
+</div></section>
+
+<!-- CODE -->
+<section style="padding-top:0"><div class="wrap">
+  <div class="cols">
+    <div>
+      <h2 style="font-size:30px;margin:0 0 12px;letter-spacing:-.02em">Si usaste Playwright,<br>ya sabes Mobiwright</h2>
+      <p style="color:var(--sub);font-size:16px">Misma ergonomía: locators perezosos, aserciones con reintento y un runner con
+      <code>describe</code>, hooks, reintentos y reportes <code>list/html/json/junit</code>.</p>
+      <p style="color:var(--sub);font-size:16px">Selecciona por <b>rol semántico</b> y encadena para acotar la búsqueda dentro de un contenedor.</p>
+    </div>
+    <div class="code">
+      <div class="bar"><i style="background:#ff6b81"></i><i style="background:#f4b740"></i><i style="background:#34d39a"></i><span class="f">login.spec.ts</span></div>
+<pre><span class="t-key">import</span> { test, expect } <span class="t-key">from</span> <span class="t-str">"mobiwright"</span><span class="t-pun">;</span>
+
+test(<span class="t-str">"login con credenciales válidas"</span>, <span class="t-key">async</span> ({ device }) => {
+  <span class="t-key">await</span> device.<span class="t-fn">getByTestId</span>(<span class="t-str">"email_input"</span>).<span class="t-fn">fill</span>(<span class="t-str">"daniel@example.com"</span>)<span class="t-pun">;</span>
+  <span class="t-key">await</span> device.<span class="t-fn">getByTestId</span>(<span class="t-str">"password_input"</span>).<span class="t-fn">fill</span>(<span class="t-str">"Sup3rSecret!"</span>)<span class="t-pun">;</span>
+  <span class="t-key">await</span> device.<span class="t-fn">getByRole</span>(<span class="t-str">"button"</span>, { name: <span class="t-str">"Iniciar sesión"</span> }).<span class="t-fn">tap</span>()<span class="t-pun">;</span>
+
+  <span class="t-key">await</span> <span class="t-fn">expect</span>(device.<span class="t-fn">getByTestId</span>(<span class="t-str">"home_title"</span>)).<span class="t-fn">toBeVisible</span>()<span class="t-pun">;</span>
+})<span class="t-pun">;</span></pre>
+    </div>
+  </div>
+</div></section>
+
+<!-- HOW -->
+<section id="how"><div class="wrap">
+  <div class="sec-h"><h2>Cómo funciona</h2><p>De cero a tu primer test en tres pasos.</p></div>
+  <div class="grid g2" style="align-items:start">
+    <div class="card steps">
+      <div class="step"><div class="n"></div><div><h4>Instala y configura</h4><p><span class="kbd">npm i mobiwright</span> y <span class="kbd">mplay init</span> crea el config y un test de ejemplo.</p></div></div>
+      <div class="step"><div class="n"></div><div><h4>Escribe tus tests</h4><p>Selectores estables con <code>getByTestId</code> / <code>getByRole</code>; el mismo spec vale para Android e iOS.</p></div></div>
+      <div class="step"><div class="n"></div><div><h4>Ejecuta y revisa</h4><p><span class="kbd">npx mplay test</span> — informe HTML, trace paso a paso y vídeo del flujo.</p></div></div>
+    </div>
+    <div class="code">
+      <div class="bar"><i style="background:#ff6b81"></i><i style="background:#f4b740"></i><i style="background:#34d39a"></i><span class="f">terminal</span></div>
+<pre><span class="t-com"># instala y diagnostica el entorno</span>
+$ npm install mobiwright
+$ npx mplay doctor
+
+<span class="t-com"># crea config + test de ejemplo</span>
+$ npx mplay init
+
+<span class="t-com"># ejecuta (todos los proyectos / en paralelo)</span>
+$ npx mplay test
+$ npx mplay test --platform=android --workers=2
+
+<span class="t-com"># que una IA conduzca el flujo (MCP)</span>
+$ npx mplay mcp</pre>
+    </div>
+  </div>
+</div></section>
+
+<!-- SELECTORS -->
+<section style="padding-top:0"><div class="wrap">
+  <div class="sec-h"><h2>Locators expresivos</h2><p>Mapean a los tipos nativos de cada plataforma.</p></div>
+  <table>
+    <tr><th>Método</th><th>Android / iOS</th></tr>
+    <tr><td>getByTestId("login")</td><td>resource-id (RN testID) / accessibilityIdentifier</td></tr>
+    <tr><td>getByRole("button", { name })</td><td>mapea rol → tipos nativos (button, textfield, text…)</td></tr>
+    <tr><td>getByText(/bienvenid/i)</td><td>texto visible (string o RegExp)</td></tr>
+    <tr><td>getByAccessibility("Cerrar")</td><td>content-desc / accessibilityLabel</td></tr>
+    <tr><td>listitem.first().getByRole("button")</td><td>encadenamiento por contención de bounds</td></tr>
+  </table>
+</div></section>
+
+<!-- AI / MCP -->
+<section id="ai"><div class="wrap">
+  <div class="cols">
+    <div>
+      <span class="chip ok">Estándar abierto</span>
+      <h2 style="font-size:30px;margin:14px 0 12px;letter-spacing:-.02em">Que una IA recorra y revise tu app</h2>
+      <p style="color:var(--sub);font-size:16px">El servidor <b>MCP</b> de Mobiwright expone el emulador a cualquier modelo
+      (Claude, GPT, Gemini, modelos locales…). La IA recibe el <b>árbol de accesibilidad</b> —no píxeles—, decide el siguiente
+      paso y construye un <b>grafo de flujos</b> para recorrer todas las pantallas sin perderse.</p>
+      <p style="color:var(--sub);font-size:16px">Detecta automáticamente pantallas de <b>login</b>, <b>permisos</b>, <b>ANR</b>,
+      <b>WebView</b> y el <b>framework</b> (nativo, React Native, Flutter…).</p>
+      <a class="btn ghost" href="https://github.com/dan085/Mobiwright/blob/main/MCP.md">Leer la guía MCP ↗</a>
+    </div>
+    <div class="shot" style="max-width:420px;margin:0 auto">
+      <img src="assets/08_flowgraph.png" alt="Grafo de flujos generado por la IA" />
+      <div class="cap"><span class="chip ok">get_flow_graph</span><b>Grafo de flujos: pantallas (nodos) y acciones (aristas).</b></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- FLOWS GALLERY -->
+<section id="flows"><div class="wrap">
+  <div class="sec-h"><h2>Situaciones del flujo que entiende</h2><p>Mobiwright detecta y maneja los casos que rompen los tests móviles.</p></div>
+  <div class="gal">
+    <div class="shot"><img src="assets/01_login.png" alt="Login"><div class="cap"><span class="chip ok">Correcto</span><b>Detecta la pantalla de login</b></div></div>
+    <div class="shot"><img src="assets/03_permission.png" alt="Permisos"><div class="cap"><span class="chip warn">Manejado</span><b>Diálogo de permisos</b></div></div>
+    <div class="shot"><img src="assets/04_keyboard.png" alt="Teclado"><div class="cap"><span class="chip warn">Manejado</span><b>Teclado que tapa el botón</b></div></div>
+    <div class="shot"><img src="assets/06_offscreen.png" alt="Scroll"><div class="cap"><span class="chip warn">Manejado</span><b>Elemento fuera de pantalla</b></div></div>
+    <div class="shot"><img src="assets/07_webview.png" alt="WebView"><div class="cap"><span class="chip ok">Correcto</span><b>WebView / app híbrida</b></div></div>
+    <div class="shot"><img src="assets/05_anr.png" alt="ANR"><div class="cap"><span class="chip bad">Señalado</span><b>App no responde (ANR)</b></div></div>
+    <div class="shot"><img src="assets/09_rotation.png" alt="Rotación"><div class="cap"><span class="chip warn">Manejado</span><b>Rotación / orientación</b></div></div>
+    <div class="shot"><img src="assets/11_modal.png" alt="Modal"><div class="cap"><span class="chip warn">Manejado</span><b>Modal / bottom sheet</b></div></div>
+  </div>
+  <p style="text-align:center;color:var(--mut);margin-top:22px;font-size:14px">Reporte completo con los 11 casos e instrucciones para replicarlos en
+  <a style="color:var(--brand)" href="https://github.com/dan085/Mobiwright/blob/main/report/FLOW_REPORT.md">FLOW_REPORT.md ↗</a></p>
+</div></section>
+
+<!-- START -->
+<section id="start"><div class="wrap">
+  <div class="cta-band">
+    <h2 style="font-size:32px;margin:0 0 10px;letter-spacing:-.02em">Empieza en un minuto</h2>
+    <p style="color:var(--sub);max-width:600px;margin:0 auto 22px;font-size:16px">Clona el repo, compila y prueba el flujo de demo sin necesidad de un emulador.</p>
+    <div class="code" style="text-align:left;max-width:640px;margin:0 auto">
+      <div class="bar"><i style="background:#ff6b81"></i><i style="background:#f4b740"></i><i style="background:#34d39a"></i><span class="f">quickstart</span></div>
+<pre>$ git clone https://github.com/dan085/Mobiwright.git
+$ cd Mobiwright && npm install && npm run build
+
+<span class="t-com"># prueba sin dispositivo (driver de demostración)</span>
+$ npm run verify        <span class="t-com"># casos borde</span>
+$ npm run test:demo     <span class="t-com"># flujo de login completo</span></pre>
+    </div>
+    <div class="cta" style="margin-top:24px">
+      <a class="btn primary" href="https://github.com/dan085/Mobiwright">Ver el repositorio</a>
+      <a class="btn ghost" href="https://github.com/dan085/Mobiwright/blob/main/SETUP.md">Guía de instalación</a>
+    </div>
+  </div>
+</div></section>
+
+</main>
+
+<footer><div class="wrap row">
+  <div><b style="color:var(--ink)">Mobiwright</b> · E2E móvil estilo Playwright con IA · MIT</div>
+  <div style="display:flex;gap:18px">
+    <a href="https://github.com/dan085/Mobiwright">GitHub</a>
+    <a href="https://github.com/dan085/Mobiwright/blob/main/README.md">Docs</a>
+    <a href="https://github.com/dan085/Mobiwright/blob/main/MCP.md">MCP</a>
+    <a href="https://github.com/dan085/Mobiwright/blob/main/MODELS.md">Modelos</a>
+  </div>
+</div></footer>
+
+</body>
+</html>
